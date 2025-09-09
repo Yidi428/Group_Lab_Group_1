@@ -4,8 +4,7 @@ using namespace std;
 int main(){
     int answer;
     int choice;
-
-
+    
     //Show a menu with options for Addition, Subtraction, Multiplication, Division, and Statistics.
 
     cout << "Hello, welcome to Math Practice! Enter a number for choosing subject." << endl;
