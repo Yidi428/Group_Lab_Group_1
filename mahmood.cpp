@@ -1,8 +1,135 @@
-// File: mahmood.cpp
-
 #include <iostream>
+#include <cstdlib>
+#include <iomanip>
+#include <ctime>
+#include <cmath>
+using namespace std;
 
 int main() {
-    std::cout << "Hello, Mahmood!" << std::endl;
+    int choice;
+    int correct = 0, incorrect = 0;
+    int user_answer = 0;
+    int quit = -1;
+    int a, b;
+
+    srand(time(0)); // Seed random generator
+
+    while (quit != 0) {
+        cout << "\nWelcome to Mahmood's Calculator!" << endl;
+        cout << "Please select an operation:" << endl;
+        cout << "1) Addition" << endl;
+        cout << "2) Subtraction" << endl;
+        cout << "3) Multiplication" << endl;
+        cout << "4) Division" << endl;
+        cout << "5) Statistics (summary of performance)" << endl;
+        cout << "6) Quit" << endl;
+        cout << "Your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                user_answer = 0;
+                while (user_answer != -999) {
+                    a = rand() % 100;
+                    b = rand() % 100;
+                    cout << a << " + " << b << " = ";
+                    cin >> user_answer;
+                    if (user_answer == -999) break;
+                    if (user_answer == a + b) {
+                        cout << "Correct!" << endl;
+                        correct++;
+                    } else {
+                        cout << "Incorrect. The correct answer is " << a + b << endl;
+                        incorrect++;
+                    }
+                }
+                break;
+            }
+
+            case 2: {
+                user_answer = 0;
+                while (user_answer != -999) {
+                    a = rand() % 100;
+                    b = rand() % 100;
+                    cout << a << " - " << b << " = ";
+                    cin >> user_answer;
+                    if (user_answer == -999) break;
+                    if (user_answer == a - b) {
+                        cout << "Correct!" << endl;
+                        correct++;
+                    } else {
+                        cout << "Incorrect. The correct answer is " << a - b << endl;
+                        incorrect++;
+                    }
+                }
+                break;
+            }
+
+            case 3: {
+                user_answer = 0;
+                while (user_answer != -999) {
+                    a = rand() % 20;
+                    b = rand() % 20;
+                    cout << a << " * " << b << " = ";
+                    cin >> user_answer;
+                    if (user_answer == -999) break;
+                    if (user_answer == a * b) {
+                        cout << "Correct!" << endl;
+                        correct++;
+                    } else {
+                        cout << "Incorrect. The correct answer is " << a * b << endl;
+                        incorrect++;
+                    }
+                }
+                break;
+            }
+
+            case 4: {
+                user_answer = 0;
+                while (user_answer != -999) {
+                    a = rand() % 100 + 1;
+                    b = rand() % 10 + 1;
+                    cout << a << " / " << b << " = ";
+                    cin >> user_answer;
+                    if (user_answer == -999) break;
+                    if (user_answer == a / b) {
+                        cout << "Correct!" << endl;
+                        correct++;
+                    } else {
+                        cout << "Incorrect. The correct answer is " << a / b << endl;
+                        incorrect++;
+                    }
+                }
+                break;
+            }
+
+            case 5: {
+                int total = correct + incorrect;
+                cout << "\nStatistics:" << endl;
+                cout << "Total Questions:    " << setw(10) << total << endl;
+                cout << "Correct Answers:    " << setw(10) << correct << endl;
+                cout << "Incorrect Answers:  " << setw(10) << incorrect << endl;
+                if (total > 0) {
+                    cout << "Accuracy:           " << setw(10)
+                         << fixed << setprecision(2) << (correct * 100.0 / total) << "%" << endl;
+                } else {
+                    cout << "No questions answered yet." << endl;
+                }
+                break;
+            }
+
+            case 6: {
+                cout << "Thank you for using Mahmood's Calculator. Goodbye!" << endl;
+                return 0;
+            }
+
+            default:
+                cout << "Invalid choice. Please select a number from 1 to 6." << endl;
+        }
+
+        cout << "\nEnter any number to return to the main menu, or 0 to exit: ";
+        cin >> quit;
+    }
+
     return 0;
 }
