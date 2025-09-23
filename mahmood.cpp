@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <ctime>
 #include <cmath>
+#include <fstream>
 using namespace std;
 int main() {
     int choice;
@@ -109,6 +110,13 @@ int main() {
             } else {
                 cout<<"No questions answered yet."<<endl;
             }
+            ofstream outfile;
+            outfile.open("statistics.txt");
+            
+            outfile<<"Statistics:"<<endl;
+            outfile<<"Total Questions: "<<setw(10)<<total<<endl;
+            outfile<<"Correct Answers: "<<setw(10)<<correct<<endl;
+            outfile<<"Incorrect Answers: "<<setw(10)<<incorrect<<endl;
             break;
         }
         case 6: {
@@ -121,5 +129,6 @@ int main() {
     cout<<"enter any number to restart or 0 to end program:"<<endl;
         cin>>quit;
 }
+
     return 0;
 }
