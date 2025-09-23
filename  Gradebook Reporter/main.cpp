@@ -49,8 +49,8 @@ int main(){
         }
         
         string status = (average >= 60) ? "PASS" : "FAIL";
-        
-        cout << studentName << " " << average << " " << letterGrade << " " << status << endl;
+
+        cout << setw(100) << studentName << " " << average << " " << letterGrade << " " << status << endl;
         
         inputFile.ignore();
     }
