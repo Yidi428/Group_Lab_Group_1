@@ -46,6 +46,7 @@ static void on_convert(Fl_Widget*, void* ud) {
     double amt = atof(app->amount->value());
     string f = selected(app->from), t = selected(app->to);
     if (!app->rate.count(f) || !app->rate.count(t)) return;
+
     double fx = app->rate[t] / app->rate[f];
     double res = amt * fx;
 
@@ -68,45 +69,36 @@ static void on_swap(Fl_Widget*, void* ud) {
 int main(int argc, char** argv) {
     App app;
 
-    // Wider window and proper label widgets
     app.win = new Fl_Window(640, 380, "Currency Converter");
     int x = 20, y = 20, labw = 110, w = 360, h = 28, gap = 36;
 
-    // Amount
     new Fl_Box(FL_NO_BOX, x, y, labw, h, "Amount:");
     app.amount = new Fl_Input(x + labw + 10, y, w, h);
     app.amount->value("100");
 
-    // From
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "From:");
     app.from = new Fl_Choice(x + labw + 10, y, w, h);
     const char* opts[] = {"USD","EUR","GBP","JPY","INR","CAD","AUD"};
-    for (const char* c : opts) app.from->add(c);
+    for (auto c : opts) app.from->add(c);
     app.from->value(0);
 
-    // To
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "To:");
     app.to = new Fl_Choice(x + labw + 10, y, w, h);
-    for (const char* c : opts) app.to->add(c);
+    for (auto c : opts) app.to->add(c);
     app.to->value(1);
 
-    // Buttons
     auto* btnConvert = new Fl_Button(x + labw + 10, y += gap, 120, h, "Convert");
     btnConvert->callback(on_convert, &app);
     auto* btnSwap = new Fl_Button(x + labw + 10 + 130, y, 120, h, "Swap");
     btnSwap->callback(on_swap, &app);
 
-    // Result
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "Result:");
     app.result = new Fl_Output(x + labw + 10, y, w, h);
 
-    // History
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "History:");
     app.history = new Fl_Multiline_Output(x + labw + 10, y, w, 120);
 
-    // Make history area resizable so the window resize works nicely
     app.win->resizable(app.history);
-
     app.win->end();
     app.win->show(argc, argv);
     return Fl::run();
