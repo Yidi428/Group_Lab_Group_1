@@ -1,0 +1,105 @@
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Choice.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Output.H>
+#include <FL/Fl_Multiline_Output.H>
+#include <FL/Fl_Box.H>
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
+
+struct App {
+    Fl_Window* win{};
+    Fl_Input* amount{};
+    Fl_Choice* from{};
+    Fl_Choice* to{};
+    Fl_Output* result{};
+    Fl_Multiline_Output* history{};
+    unordered_map<string,double> rate{
+        {"USD",1.00},{"EUR",0.92},{"GBP",0.79},{"JPY",149.50},
+        {"INR",83.00},{"CAD",1.36},{"AUD",1.52}
+    };
+    vector<string> hist;
+};
+
+static string selected(const Fl_Choice* c) {
+    const char* t = c->text();
+    return t ? string(t) : string();
+}
+
+static void push_history(App* app, const string& line, size_t keep=10) {
+    app->hist.push_back(line);
+    if (app->hist.size() > keep) app->hist.erase(app->hist.begin());
+    ostringstream oss;
+    for (const auto& s : app->hist) oss << s << '\n';
+    app->history->value(oss.str().c_str());
+}
+
+static void on_convert(Fl_Widget*, void* ud) {
+    auto* app = static_cast<App*>(ud);
+    double amt = atof(app->amount->value());
+    string f = selected(app->from), t = selected(app->to);
+    if (!app->rate.count(f) || !app->rate.count(t)) return;
+
+    double fx = app->rate[t] / app->rate[f];
+    double res = amt * fx;
+
+    ostringstream os; os << fixed << setprecision(2) << res;
+    app->result->value(os.str().c_str());
+
+    ostringstream line;
+    line << fixed << setprecision(2)
+         << amt << ' ' << f << " = " << res << ' ' << t
+         << "  (rate " << setprecision(6) << fx << ' ' << t << '/' << f << ')';
+    push_history(app, line.str());
+}
+
+static void on_swap(Fl_Widget*, void* ud) {
+    auto* app = static_cast<App*>(ud);
+    int iF = app->from->value(), iT = app->to->value();
+    if (iF >= 0 && iT >= 0) { app->from->value(iT); app->to->value(iF); }
+}
+
+int main(int argc, char** argv) {
+    App app;
+
+    app.win = new Fl_Window(640, 380, "Currency Converter");
+    int x = 20, y = 20, labw = 110, w = 360, h = 28, gap = 36;
+
+    new Fl_Box(FL_NO_BOX, x, y, labw, h, "Amount:");
+    app.amount = new Fl_Input(x + labw + 10, y, w, h);
+    app.amount->value("100");
+
+    new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "From:");
+    app.from = new Fl_Choice(x + labw + 10, y, w, h);
+    const char* opts[] = {"USD","EUR","GBP","JPY","INR","CAD","AUD"};
+    for (auto c : opts) app.from->add(c);
+    app.from->value(0);
+
+    new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "To:");
+    app.to = new Fl_Choice(x + labw + 10, y, w, h);
+    for (auto c : opts) app.to->add(c);
+    app.to->value(1);
+
+    auto* btnConvert = new Fl_Button(x + labw + 10, y += gap, 120, h, "Convert");
+    btnConvert->callback(on_convert, &app);
+    auto* btnSwap = new Fl_Button(x + labw + 10 + 130, y, 120, h, "Swap");
+    btnSwap->callback(on_swap, &app);
+
+    new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "Result:");
+    app.result = new Fl_Output(x + labw + 10, y, w, h);
+
+    new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "History:");
+    app.history = new Fl_Multiline_Output(x + labw + 10, y, w, 120);
+
+    app.win->resizable(app.history);
+    app.win->end();
+    app.win->show(argc, argv);
+    return Fl::run();
+}
