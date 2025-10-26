@@ -4,14 +4,17 @@
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Multiline_Output.H>
+#include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Text_Buffer.H>
 #include <FL/Fl_Box.H>
+
 #include <unordered_map>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <iomanip>
 #include <cstdlib>
+
 using namespace std;
 
 struct App {
@@ -20,12 +23,14 @@ struct App {
     Fl_Choice* from{};
     Fl_Choice* to{};
     Fl_Output* result{};
-    Fl_Multiline_Output* history{};
-    unordered_map<string,double> rate{
+    Fl_Text_Display* history{};
+    Fl_Text_Buffer* history_buf{};
+
+    unordered_map<string, double> rate{
         {"USD",1.00},{"EUR",0.92},{"GBP",0.79},{"JPY",149.50},
         {"INR",83.00},{"CAD",1.36},{"AUD",1.52}
     };
-    vector<string> hist;
+    vector<string> hist; // store last N lines we render to history
 };
 
 static string selected(const Fl_Choice* c) {
@@ -33,26 +38,40 @@ static string selected(const Fl_Choice* c) {
     return t ? string(t) : string();
 }
 
-static void push_history(App* app, const string& line, size_t keep=10) {
+static void push_history(App* app, const string& line, size_t keep = 50) {
     app->hist.push_back(line);
     if (app->hist.size() > keep) app->hist.erase(app->hist.begin());
+
     ostringstream oss;
     for (const auto& s : app->hist) oss << s << '\n';
-    app->history->value(oss.str().c_str());
+    app->history_buf->text(oss.str().c_str());
+
+    // Auto-scroll to newest entry
+    app->history->insert_position(app->history_buf->length());
+    app->history->show_insert_position();
 }
 
 static void on_convert(Fl_Widget*, void* ud) {
     auto* app = static_cast<App*>(ud);
-    double amt = atof(app->amount->value());
-    string f = selected(app->from), t = selected(app->to);
+
+    // amount
+    const char* a = app->amount->value();
+    double amt = a && *a ? atof(a) : 0.0;
+
+    // currencies
+    string f = selected(app->from);
+    string t = selected(app->to);
     if (!app->rate.count(f) || !app->rate.count(t)) return;
 
+    // fx
     double fx = app->rate[t] / app->rate[f];
     double res = amt * fx;
 
+    // show result
     ostringstream os; os << fixed << setprecision(2) << res;
     app->result->value(os.str().c_str());
 
+    // history line
     ostringstream line;
     line << fixed << setprecision(2)
          << amt << ' ' << f << " = " << res << ' ' << t
@@ -62,43 +81,58 @@ static void on_convert(Fl_Widget*, void* ud) {
 
 static void on_swap(Fl_Widget*, void* ud) {
     auto* app = static_cast<App*>(ud);
-    int iF = app->from->value(), iT = app->to->value();
-    if (iF >= 0 && iT >= 0) { app->from->value(iT); app->to->value(iF); }
+    int iF = app->from->value();
+    int iT = app->to->value();
+    if (iF >= 0 && iT >= 0) {
+        app->from->value(iT);
+        app->to->value(iF);
+    }
 }
 
 int main(int argc, char** argv) {
     App app;
 
-    app.win = new Fl_Window(640, 380, "Currency Converter");
-    int x = 20, y = 20, labw = 110, w = 360, h = 28, gap = 36;
+    // Window + basic layout constants
+    app.win = new Fl_Window(640, 400, "Currency Converter");
+    int x = 20, y = 20, labw = 110, w = 420, h = 28, gap = 36;
 
+    // Amount
     new Fl_Box(FL_NO_BOX, x, y, labw, h, "Amount:");
     app.amount = new Fl_Input(x + labw + 10, y, w, h);
     app.amount->value("100");
 
+    // From
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "From:");
     app.from = new Fl_Choice(x + labw + 10, y, w, h);
     const char* opts[] = {"USD","EUR","GBP","JPY","INR","CAD","AUD"};
-    for (auto c : opts) app.from->add(c);
+    for (const char* c : opts) app.from->add(c);
     app.from->value(0);
 
+    // To
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "To:");
     app.to = new Fl_Choice(x + labw + 10, y, w, h);
-    for (auto c : opts) app.to->add(c);
+    for (const char* c : opts) app.to->add(c);
     app.to->value(1);
 
+    // Buttons
     auto* btnConvert = new Fl_Button(x + labw + 10, y += gap, 120, h, "Convert");
     btnConvert->callback(on_convert, &app);
     auto* btnSwap = new Fl_Button(x + labw + 10 + 130, y, 120, h, "Swap");
     btnSwap->callback(on_swap, &app);
 
+    // Result
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "Result:");
     app.result = new Fl_Output(x + labw + 10, y, w, h);
 
+    // History (scrollable)
     new Fl_Box(FL_NO_BOX, x, y += gap, labw, h, "History:");
-    app.history = new Fl_Multiline_Output(x + labw + 10, y, w, 120);
+    app.history = new Fl_Text_Display(x + labw + 10, y, w, 120);
+    app.history_buf = new Fl_Text_Buffer();
+    app.history->buffer(app.history_buf);
 
+    // Make history area resizable
     app.win->resizable(app.history);
+
     app.win->end();
     app.win->show(argc, argv);
     return Fl::run();
