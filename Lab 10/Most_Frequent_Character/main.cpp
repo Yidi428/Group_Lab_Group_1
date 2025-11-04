@@ -4,7 +4,11 @@
 using namespace std;
 
  char* mostFrequentCharacter(char* arr, int size) {
-    char* newArr = new char[size + 1];
+    char* newArr = new char[size];
+
+    for (int i = 0; i < size; i++) {
+        
+    }
 
     return "";
 }
