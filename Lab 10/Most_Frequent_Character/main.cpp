@@ -3,15 +3,18 @@
 #include <string>
 using namespace std;
 
-void mostFrequentCharacter() {
-
+string mostFrequentCharacter() {
+    return;
 }
 
 int main() {
+    
+    string str;
 
-    string str = "Potato";
+    cout << "Please enter one word: ";
+    cin >> str;
 
-    cout << str;
+    cout << "In your word, here's the most repeating characters: ";
 
     return 0;
 }
