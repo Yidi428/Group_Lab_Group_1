@@ -34,7 +34,7 @@ int main() {
     cout << endl;
 
     delete[] arr;
-    delete[] expandedArr;
-
+    delete[] expandedArr;  
+    
     return 0;
 }
