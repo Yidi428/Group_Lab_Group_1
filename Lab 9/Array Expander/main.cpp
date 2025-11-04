@@ -2,45 +2,39 @@
 #include <iostream>
 using namespace std;
 
-void arrayExpander(int* arr, int size) {
-    return;
+int* arrayExpander(const int* arr, int size) {
+    int* newArr = new int[size * 2];
+    for (int i = 0; i < size; ++i) {
+        newArr[i] = arr[i];
+    }
+    for (int i = size; i < size * 2; ++i) {
+        newArr[i] = 0;
+    }
+    return newArr;
 }
 
 int main() {
+    int size = 0;
 
-    int size;
-
-    cout << "Enter array size to populate from 1 to Size: ";
+    cout << "Enter the size of the array (must be greater than 0). The resulting array will be empty: ";
     cin >> size;
 
-    int* array = new int[size];
+    int* arr = new int[size];
 
-    for (int i = 0; i < size; i++) {
-        array[i] = i + 1;
+    for (int i = 0; i < size; ++i) {
+        arr[i] = i + 1;
     }
 
-    cout << endl;
+    int* expandedArr = arrayExpander(arr, size);
 
-    cout << "Here's your array: ";
-
-    for (int i = 0; i < size; i++) {
-        cout << array[i] << " ";
+    cout << "Expanded array: ";
+    for (int i = 0; i < size * 2; ++i) {
+        cout << expandedArr[i] << " ";
     }
     cout << endl;
 
-    arrayExpander(array, size);
-
-    cout << endl;
-
-    cout << "Here's the expanded array: ";
-
-    for (int i = 0; i < size; i++) {
-        cout << array[i] << " ";
-    }
-
-    cout << endl;
-
-    delete [] array;
+    delete[] arr;
+    delete[] expandedArr;
 
     return 0;
 }
