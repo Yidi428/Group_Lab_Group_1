@@ -37,6 +37,9 @@
         "string_view": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "cwctype": "cpp",
+        "execution": "cpp",
+        "algorithm": "cpp"
     }
 }
