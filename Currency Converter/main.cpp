@@ -39,7 +39,8 @@ struct App {
 
 static string selected(const Fl_Choice* c) {
     const char* t = c->text();
-    return t ? string(t) : string();
+    if (!t) return string();
+    return strlen(t) > 3 ? string(t, 3) : string(t);
 }
 
 static void push_history(App* app, const string& line, size_t keep = 80) {
@@ -134,7 +135,7 @@ int main(int argc, char** argv) {
     app.from = new Fl_Choice(x + labw + 10, y, w, h);
     app.from->textsize(14);
 
-    const char* opts[] = {"USD","EUR","GBP","JPY","INR","CAD","AUD"};
+    const char* opts[] = {"USD $","EUR €","GBP £","JPY ¥","INR ₹","CAD $","AUD $"};
     for (auto c : opts) app.from->add(c);
     app.from->value(0); // USD
 
